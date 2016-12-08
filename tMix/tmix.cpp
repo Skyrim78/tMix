@@ -64,6 +64,8 @@ void tMix::select_from()
     QString fname = QFileDialog::getOpenFileName(this, "Select file...", "/HOME/", "Excel (*.xls *.xlsx)");
     ui->lineEdit_from->setText(fname);
 
+    ui->comboBox_from_list->clear();
+
     if (!fname.isEmpty()){
         excel = new QAxObject("Excel.Application", this);
         excel->setProperty("Visible", 0);
@@ -129,6 +131,7 @@ void tMix::read_source()
 
     map_from.clear();
 
+
     if (!fname.isEmpty()){
         excel = new QAxObject("Excel.Application", this);
         excel->setProperty("Visible", 0);
@@ -139,7 +142,7 @@ void tMix::read_source()
 
         currSheet = sheets->querySubObject("Item(Int)", ui->comboBox_from_list->currentIndex() + 1);
 
-        int testA = 0;
+        int testA = ui->spinBox_from_frow->value() - 1;
         for (int r = ui->spinBox_from_frow->value(); r < 25000; r++){
             QAxObject *cell = currSheet->querySubObject("Cells(Int, Int)", r, ui->spinBox_from_sn->value());
             QString _data = cell->dynamicCall("Value").toString();
@@ -147,9 +150,11 @@ void tMix::read_source()
                 break;
             }
             testA++;
+            ui->progressBar->setValue(qFloor((r * 100)/25000));
+            QApplication::processEvents();
         }
 
-        for (int r = ui->spinBox_from_frow->value(); r < testA; r++){
+        for (int r = ui->spinBox_from_frow->value(); r <= testA; r++){
             QAxObject *cellSN = currSheet->querySubObject("Cells(Int, Int)", r, ui->spinBox_from_sn->value());
             QAxObject *cellNum = currSheet->querySubObject("Cells(Int, Int)", r, ui->spinBox_from_num->value());
 
@@ -167,7 +172,7 @@ void tMix::read_source()
         delete excel;
 
     }
-    qDebug() << map_from.size();
+
 }
 
 void tMix::make_it()
@@ -176,6 +181,9 @@ void tMix::make_it()
     read_source();
     ui->progressBar->setFormat("Загрузка файла...");
     ui->progressBar->setValue(0);
+
+    int row_count = 0;
+    int tag_count = 0;
 
     if (!ui->lineEdit_to->text().isEmpty()){
 
@@ -193,19 +201,19 @@ void tMix::make_it()
 
         currSheet = sheets->querySubObject("Item(Int)", ui->comboBox_to_list->currentIndex() + 1);
 
-        int testA = 0;
+        int rows = ui->spinBox_to_frow->value() - 1;
         for (int r = ui->spinBox_to_frow->value(); r < 25000; r++){
             QAxObject *cell = currSheet->querySubObject("Cells(Int, Int)", r, ui->spinBox_to_sn->value());
             QString _data = cell->dynamicCall("Value").toString();
             if (_data.isEmpty()){
                 break;
             }
-            testA++;
+            rows++;
+            row_count++;
         }
 
-        qDebug() << testA;
 
-        for (int r = ui->spinBox_to_frow->value(); r < testA; r++){
+        for (int r = ui->spinBox_to_frow->value(); r <= rows; r++){
             QAxObject *cellSN = currSheet->querySubObject("Cells(Int, Int)", r, ui->spinBox_to_sn->value());
             QAxObject *cellTag = currSheet->querySubObject("Cells(Int, Int)", r, ui->spinBox_to_tag->value());
 
@@ -213,8 +221,12 @@ void tMix::make_it()
 
             cellTag->dynamicCall("Value", map_from.value(_sn));
 
+            if (!map_from.value(_sn).isEmpty()){
+                tag_count++;
+            }
+
             ui->progressBar->setFormat("Обработка - %p%");
-            ui->progressBar->setValue(qFloor((r * 100)/testA));
+            ui->progressBar->setValue(qFloor((r * 100)/rows));
             QApplication::processEvents();
         }
 
@@ -228,6 +240,13 @@ void tMix::make_it()
 
     ui->progressBar->hide();
     QMessageBox messa;
-    messa.setText("Готово!");
+    messa.setText(QString("<p align=\"center\"><span style=\"font-weight:600;\">Выполнено</span></p> "
+                          "<p><span style=\"font-style:italic;\">Собрано номеров: </span><span style=\"font-weight:600; font-style:italic;\">%1</span></p>"
+                          "<p><span style=\"font-style:italic;\">Обработано строк: </span><span style=\"font-weight:600; font-style:italic;\">%2</span></p>"
+                          "<p><span style=\"font-style:italic;\">Найдено совпадений: </span>"
+                          "<span style=\"font-weight:600; font-style:italic; color:#00aa00;\">%3</span></p>")
+                          .arg(map_from.size())
+                          .arg(row_count)
+                          .arg(tag_count));
     messa.exec();
 }
