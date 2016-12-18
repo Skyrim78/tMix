@@ -70,13 +70,14 @@ void operatorsM::add()
 
 void operatorsM::edit()
 {
+    ui->groupBox_operator->setVisible(true);
     POS = ui->tableWidget_oper->currentRow();
     ID = ui->tableWidget_oper->item(POS, 0)->text().toInt();
     ui->lineEdit_name->setText(ui->tableWidget_oper->item(POS, 1)->text());
     if (ui->tableWidget_oper->item(POS, 2)->text().toInt() == 0){
-        ui->pushButton_del->setEnabled(false);
-    } else {
         ui->pushButton_del->setEnabled(true);
+    } else {
+        ui->pushButton_del->setEnabled(false);
     }
 
     if (POS == 0){

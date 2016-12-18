@@ -7,6 +7,8 @@
 #include <QSettings>
 #include <QCloseEvent>
 #include <QFileDialog>
+#include <ActiveQt/QAxBase>
+#include <ActiveQt/QAxObject>
 
 namespace Ui {
 class data_add;
@@ -20,6 +22,12 @@ public:
     explicit data_add(QWidget *parent = 0);
     ~data_add();
 
+    QAxObject *excel;
+    QAxObject *wbook;
+    QAxObject *book;
+    QAxObject *sheets;
+    QAxObject *currSheet;
+
     QTimer *timer;
 
     QString report;
@@ -29,9 +37,9 @@ public:
 private:
     Ui::data_add *ui;
 
-    virtual void closeEvent(QCloseEvent *event);
-
 public slots:
+    void load();
+
     void setting_read();
     void setting_write();
 
@@ -43,6 +51,13 @@ public slots:
     void load_data();
 
     void make_report();
+    // file active
+    void act_select_file();
+    void act_update();
+
+    //search
+    void search(const QString str);
+
 };
 
 #endif // DATA_ADD_H

@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql
+QT       += core gui sql axcontainer
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -16,14 +16,17 @@ SOURCES += main.cpp\
         tmix.cpp \
     forma.cpp \
     data_add.cpp \
-    operators.cpp
+    operators.cpp \
+    make_document.cpp
 
 HEADERS  += tmix.h \
     forma.h \
     data_add.h \
-    operators.h
+    operators.h \
+    make_document.h
 
 FORMS    += tmix.ui \
     forma.ui \
     data_add.ui \
-    operators.ui
+    operators.ui \
+    make_document.ui

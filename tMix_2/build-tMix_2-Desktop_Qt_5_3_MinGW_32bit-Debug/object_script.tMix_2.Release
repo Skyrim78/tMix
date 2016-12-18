@@ -1,0 +1,13 @@
+INPUT(
+./release\main.o
+./release\tmix.o
+./release\forma.o
+./release\data_add.o
+./release\operators.o
+./release\make_document.o
+./release\moc_tmix.o
+./release\moc_forma.o
+./release\moc_data_add.o
+./release\moc_operators.o
+./release\moc_make_document.o
+);

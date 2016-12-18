@@ -6,10 +6,15 @@ FormA::FormA(QWidget *parent) :
     ui(new Ui::FormA)
 {
     ui->setupUi(this);
-    connect(ui->pushButton_exit, SIGNAL(clicked(bool)), this, SLOT(close()));
+    connect(ui->pushButton_exit, SIGNAL(clicked(bool)), this, SLOT(closeProgramm()));
 }
 
 FormA::~FormA()
 {
     delete ui;
+}
+
+void FormA::closeProgramm()
+{
+    QApplication::quit();
 }

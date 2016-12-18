@@ -62,12 +62,25 @@
          </property>
          <property name="minimumSize">
           <size>
-           <width>120</width>
-           <height>30</height>
+           <width>130</width>
+           <height>35</height>
           </size>
          </property>
+         <property name="maximumSize">
+          <size>
+           <width>130</width>
+           <height>35</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>9</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
          <property name="text">
-          <string>Exit</string>
+          <string>Выход</string>
          </property>
         </widget>
        </item>

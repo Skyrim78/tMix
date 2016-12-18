@@ -17,6 +17,9 @@ public:
 
 private:
     Ui::FormA *ui;
+
+public slots:
+    void closeProgramm();
 };
 
 #endif // FORMA_H
