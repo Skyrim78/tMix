@@ -17,16 +17,19 @@ SOURCES += main.cpp\
     forma.cpp \
     data_add.cpp \
     operators.cpp \
-    make_document.cpp
+    make_document.cpp \
+    stat.cpp
 
 HEADERS  += tmix.h \
     forma.h \
     data_add.h \
     operators.h \
-    make_document.h
+    make_document.h \
+    stat.h
 
 FORMS    += tmix.ui \
     forma.ui \
     data_add.ui \
     operators.ui \
-    make_document.ui
+    make_document.ui \
+    stat.ui

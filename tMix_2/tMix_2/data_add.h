@@ -55,8 +55,16 @@ public slots:
     void act_select_file();
     void act_update();
 
-    //search
-    void search(const QString str);
+    //накладные
+    void n_select_file();
+    void n_read_file();
+    void n_load_data();
+
+    int get_id_nakl(const QString _nakl);
+    int get_id_firm(const QString _firm);
+    int get_id_org(const QString _org);
+
+
 
 };
 

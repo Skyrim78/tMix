@@ -26,7 +26,6 @@ QT_BEGIN_NAMESPACE
 class Ui_FormA
 {
 public:
-    QGridLayout *gridLayout_2;
     QGridLayout *gridLayout;
     QLabel *label;
     QHBoxLayout *horizontalLayout;
@@ -37,10 +36,8 @@ public:
     {
         if (FormA->objectName().isEmpty())
             FormA->setObjectName(QStringLiteral("FormA"));
-        FormA->resize(653, 449);
-        gridLayout_2 = new QGridLayout(FormA);
-        gridLayout_2->setObjectName(QStringLiteral("gridLayout_2"));
-        gridLayout = new QGridLayout();
+        FormA->resize(1061, 760);
+        gridLayout = new QGridLayout(FormA);
         gridLayout->setObjectName(QStringLiteral("gridLayout"));
         label = new QLabel(FormA);
         label->setObjectName(QStringLiteral("label"));
@@ -83,9 +80,6 @@ public:
         gridLayout->addLayout(horizontalLayout, 1, 0, 1, 1);
 
 
-        gridLayout_2->addLayout(gridLayout, 0, 0, 1, 1);
-
-
         retranslateUi(FormA);
 
         QMetaObject::connectSlotsByName(FormA);
@@ -94,7 +88,7 @@ public:
     void retranslateUi(QWidget *FormA)
     {
         FormA->setWindowTitle(QApplication::translate("FormA", "Form", 0));
-        label->setText(QApplication::translate("FormA", "<html><head/><body><p><span style=\" color:#195ac2;\">t</span><span style=\" font-weight:600; color:#195ac2;\">M</span><span style=\" color:#195ac2;\">ix</span></p></body></html>", 0));
+        label->setText(QApplication::translate("FormA", "<html><head/><body><p><span style=\" font-size:24pt; color:#195ac2;\">t</span><span style=\" font-weight:600; color:#195ac2;\">M</span><span style=\" color:#195ac2;\">ix</span></p></body></html>", 0));
         pushButton_exit->setText(QApplication::translate("FormA", "\320\222\321\213\321\205\320\276\320\264", 0));
     } // retranslateUi
 

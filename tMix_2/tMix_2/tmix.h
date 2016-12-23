@@ -2,11 +2,13 @@
 #define TMIX_H
 
 #include <QMainWindow>
+#include <QSettings>
 #include <QtSql/QtSql>
 #include "forma.h"
 #include "data_add.h"
 #include "operators.h"
 #include "make_document.h"
+#include "stat.h"
 
 namespace Ui {
 class tMix;
@@ -24,6 +26,7 @@ public:
     FormA *fa;
     operatorsM *om;
     make_document *md;
+    statA *st;
 
     QSqlDatabase db;
 

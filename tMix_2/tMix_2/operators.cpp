@@ -43,6 +43,7 @@ void operatorsM::load()
     QSqlQuery query("SELECT oper.id, oper.name, "
                     "(SELECT Count(phone.id) FROM phone WHERE phone.oper = oper.id) "
                     "FROM oper "
+                    "WHERE oper.id > \'0\' "
                     "ORDER BY oper.name ");
     int row = 0;
     while (query.next()){

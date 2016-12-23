@@ -5,9 +5,11 @@ INPUT(
 ./debug\data_add.o
 ./debug\operators.o
 ./debug\make_document.o
+./debug\stat.o
 ./debug\moc_tmix.o
 ./debug\moc_forma.o
 ./debug\moc_data_add.o
 ./debug\moc_operators.o
 ./debug\moc_make_document.o
+./debug\moc_stat.o
 );

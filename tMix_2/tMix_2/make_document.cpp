@@ -6,27 +6,10 @@ make_document::make_document(QWidget *parent) :
     ui(new Ui::make_document)
 {
     ui->setupUi(this);
+    load();
 
-    ui->lineEdit_file->clear();
-    ui->groupBox_report->hide();
-
-    connect(ui->toolButton_file, SIGNAL(clicked(bool)), this, SLOT(select_file()));
-    connect(ui->toolButton_file, SIGNAL(clicked(bool)), this, SLOT(setting_read()));
-
-    connect(ui->pushButton_make, SIGNAL(clicked(bool)), this, SLOT(make_file()));
-    connect(ui->pushButton_make, SIGNAL(clicked(bool)), this, SLOT(setting_write()));
-
-    connect(ui->spinBox_active, SIGNAL(valueChanged(int)), ui->horizontalSlider_active, SLOT(setValue(int)));
-    connect(ui->horizontalSlider_active, SIGNAL(valueChanged(int)), ui->spinBox_active, SLOT(setValue(int)));
-
-    connect(ui->spinBox_frow, SIGNAL(valueChanged(int)), ui->horizontalSlider_frow, SLOT(setValue(int)));
-    connect(ui->horizontalSlider_frow, SIGNAL(valueChanged(int)), ui->spinBox_frow, SLOT(setValue(int)));
-
-    connect(ui->spinBox_sn, SIGNAL(valueChanged(int)), ui->horizontalSlider_sn, SLOT(setValue(int)));
-    connect(ui->horizontalSlider_sn, SIGNAL(valueChanged(int)), ui->spinBox_sn, SLOT(setValue(int)));
-
-    connect(ui->spinBox_num, SIGNAL(valueChanged(int)), ui->horizontalSlider_num, SLOT(setValue(int)));
-    connect(ui->horizontalSlider_num, SIGNAL(valueChanged(int)), ui->spinBox_num, SLOT(setValue(int)));
+    connect(ui->pushButton_filter, SIGNAL(clicked(bool)), this, SLOT(filter()));
+    connect(ui->pushButton_save, SIGNAL(clicked(bool)), this, SLOT(save()));
 }
 
 make_document::~make_document()
@@ -34,49 +17,141 @@ make_document::~make_document()
     delete ui;
 }
 
+void make_document::load_operators()
+{
+    map_oper.clear();
+    ui->comboBox_f_oper->clear();
+    QSqlQuery query("SELECT oper.id, oper.name FROM oper ORDER BY oper.name ASC ");
+    while (query.next()){
+        map_oper.insert(ui->comboBox_f_oper->count(), query.value(0).toInt());
+        ui->comboBox_f_oper->addItem(query.value(1).toString());
+    }
+}
+
+void make_document::load_nakl()
+{
+    map_nakl.clear();
+    ui->comboBox_f_nakl->clear();
+    QSqlQuery query("SELECT nakl.id, nakl.name FROM nakl ORDER BY nakl.name ASC ");
+    while (query.next()){
+        map_nakl.insert(ui->comboBox_f_nakl->count(), query.value(0).toInt());
+        ui->comboBox_f_nakl->addItem(query.value(1).toString());
+    }
+}
+
+void make_document::load_firm()
+{
+    map_firm.clear();
+    ui->comboBox_f_firm->clear();
+    QSqlQuery query("SELECT firm.id, firm.name FROM firm ORDER BY firm.name ASC ");
+    while (query.next()){
+        map_firm.insert(ui->comboBox_f_firm->count(), query.value(0).toInt());
+        ui->comboBox_f_firm->addItem(query.value(1).toString());
+    }
+}
+
+void make_document::load_org()
+{
+    map_org.clear();
+    ui->comboBox_f_org->clear();
+    QSqlQuery query("SELECT org.id, org.name FROM org ORDER BY org.name ASC ");
+    while (query.next()){
+        map_org.insert(ui->comboBox_f_org->count(), query.value(0).toInt());
+        ui->comboBox_f_org->addItem(query.value(1).toString());
+    }
+}
+
 void make_document::load()
 {
-    ui->lineEdit_file->clear();
-    ui->groupBox_report->hide();
+    for (int r = ui->tableWidget_filter->rowCount() - 1; r >= 0; r--){
+        ui->tableWidget_filter->removeRow(r);
+    }
+    ui->checkBox_f_oper->setChecked(false);
+    ui->comboBox_f_oper->setEnabled(false);
+    connect(ui->checkBox_f_oper, SIGNAL(clicked(bool)), ui->comboBox_f_oper, SLOT(setEnabled(bool)));
 
-    ui->comboBox_list->clear();
-    ui->spinBox_active->setValue(1);
-    ui->spinBox_frow->setValue(1);
-    ui->spinBox_sn->setValue(1);
-    ui->spinBox_num->setValue(1);
-    ui->horizontalSlider_num->setValue(1);
-    ui->horizontalSlider_frow->setValue(1);
-    ui->horizontalSlider_sn->setValue(1);
-    ui->horizontalSlider_active->setValue(1);
+    ui->checkBox_f_nakl->setChecked(false);
+    ui->comboBox_f_nakl->setEnabled(false);
+    connect(ui->checkBox_f_nakl, SIGNAL(clicked(bool)), ui->comboBox_f_nakl, SLOT(setEnabled(bool)));
 
+    ui->checkBox_f_firm->setChecked(false);
+    ui->comboBox_f_firm->setEnabled(false);
+    connect(ui->checkBox_f_firm, SIGNAL(clicked(bool)), ui->comboBox_f_firm, SLOT(setEnabled(bool)));
+
+    ui->checkBox_f_org->setChecked(false);
+    ui->comboBox_f_org->setEnabled(false);
+    connect(ui->checkBox_f_org, SIGNAL(clicked(bool)), ui->comboBox_f_org, SLOT(setEnabled(bool)));
+
+    ui->checkBox_f_active->setChecked(false);
+    ui->radioButton_fa_yes->setEnabled(false);
+    ui->radioButton_fa_no->setEnabled(false);
+    connect(ui->checkBox_f_active, SIGNAL(clicked(bool)), ui->radioButton_fa_yes, SLOT(setEnabled(bool)));
+    connect(ui->checkBox_f_active, SIGNAL(clicked(bool)), ui->radioButton_fa_no, SLOT(setEnabled(bool)));
+
+    load_operators();
+    load_nakl();
+    load_firm();
+    load_org();
 }
 
-void make_document::setting_read()
+void make_document::filter()
 {
-    QSettings sett("setting.ini", QSettings::IniFormat);
-    ui->spinBox_num->setValue(sett.value("to/num").toInt());
-    ui->spinBox_active->setValue(sett.value("to/active").toInt());
-    ui->spinBox_sn->setValue(sett.value("to/serial").toInt());
-    ui->spinBox_frow->setValue(sett.value("to/frow").toInt());
+    for (int r = ui->tableWidget_filter->rowCount() - 1; r >= 0; r--){
+        ui->tableWidget_filter->removeRow(r);
+    }
+
+    QString str("SELECT firm.name, phone.cat, phone.serial, phone.otg, phone.doc, org.name, phone.note, phone.num, phone.active "
+                "FROM phone "
+                "INNER JOIN firm ON (firm.id = phone.firm) "
+                "INNER JOIN org ON (org.id = phone.org) "
+                "WHERE (phone.id > 0) ");
+    if (ui->checkBox_f_oper->isChecked()){
+        str.append(QString("AND (phone.oper = \'%1\') ").arg(map_oper.value(ui->comboBox_f_oper->currentIndex())));
+    }
+    if (ui->checkBox_f_nakl->isChecked()){
+        str.append(QString("AND (phone.nakl = \'%1\') ").arg(map_nakl.value(ui->comboBox_f_nakl->currentIndex())));
+    }
+    if (ui->checkBox_f_firm->isChecked()){
+        str.append(QString("AND (phone.firm = \'%1\') ").arg(map_firm.value(ui->comboBox_f_firm->currentIndex())));
+    }
+    if (ui->checkBox_f_org->isChecked()){
+        str.append(QString("AND (phone.org = \'%1\') ").arg(map_org.value(ui->comboBox_f_org->currentIndex())));
+    }
+    if (ui->checkBox_f_active->isChecked()){
+        if (ui->radioButton_fa_no->isChecked()){
+            str.append("AND (phone.active IS NULL) ");
+        } else if (ui->radioButton_fa_yes->isChecked()){
+            str.append("AND (phone.active IS NOT NULL) ");
+        }
+    }
+    QSqlQuery query(str);
+    int row = 0;
+    while (query.next()){
+        ui->tableWidget_filter->insertRow(row);
+        for (int col = 0; col < 9; col++){
+            QTableWidgetItem *item = new QTableWidgetItem(query.value(col).toString());
+            ui->tableWidget_filter->setItem(row, col, item);
+        }
+        row++;
+    }
+    ui->tableWidget_filter->resizeColumnsToContents();
+    ui->tableWidget_filter->horizontalHeader()->setStretchLastSection(true);
 }
 
-void make_document::setting_write()
+void make_document::save()
 {
-    QSettings sett("setting.ini", QSettings::IniFormat);
-    sett.beginGroup("to");
-    sett.setValue("num", ui->spinBox_num->value());
-    sett.setValue("serial", ui->spinBox_sn->value());
-    sett.setValue("frow", ui->spinBox_frow->value());
-    sett.setValue("active", ui->spinBox_active->value());
-    sett.endGroup();
-}
+    ui->progressBar->setValue(0);
 
-void make_document::select_file()
-{
-    QString fname = QFileDialog::getOpenFileName(this, "Select file...", "/HOME/", "Excel (*.xls *.xlsx)");
-    ui->lineEdit_file->setText(fname);
+    QString fempty = QDir::currentPath();
+    fempty.append("/empty.xlsx");
 
-    ui->comboBox_list->clear();
+    QString fname = QFileDialog::getSaveFileName(this, "Save as...", "/HOME/", "Excel (*.xlsx)");
+
+    QFile file(fempty);
+    file.copy(fname);
+
+
+    //QString fname = QFileDialog::getOpenFileName(this, "Select file...", "/HOME/", "Excel (*.xls *.xlsx)");
 
     if (!fname.isEmpty()){
         excel = new QAxObject("Excel.Application", this);
@@ -85,175 +160,28 @@ void make_document::select_file()
         wbook = excel->querySubObject("Workbooks");
         book = wbook->querySubObject("Open (const QString&)", fname);
         sheets = book->querySubObject("Sheets");
+        currSheet = book->querySubObject("ActiveSheet");
+        currSheet->dynamicCall("Name", "tMix");//QString("tMix_%1").arg(QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss")));
 
-        int lists = sheets->dynamicCall("Count()").toInt();
-        QStringList list_name;
-        for (int x = 1; x <= lists; x++){
-            list_name << sheets->querySubObject("Item(Int)", x)->dynamicCall("Name").toString();
+        for (int row = 0; row < ui->tableWidget_filter->rowCount(); row++){
+            for (int col = 0; col < ui->tableWidget_filter->columnCount(); col++){
+                QAxObject *cell = currSheet->querySubObject("Cells(Int, Int)", row + 1, col + 1);
+                cell->dynamicCall("NumberFormat", "@");
+                cell->dynamicCall("Value", ui->tableWidget_filter->item(row, col)->text());
+            }
+            ui->progressBar->setValue(qFloor((row + 1) * 100 / ui->tableWidget_filter->rowCount()));
         }
 
-        ui->comboBox_list->addItems(list_name);
-
-
+        book->dynamicCall("Save()");
         wbook->dynamicCall("Close()");
         excel->dynamicCall("Quit()");
         delete excel;
 
-        ui->groupBox_report->hide();
+        ui->progressBar->setValue(0);
+        QMessageBox messa;
+        messa.setText("Файл сохранен!");
+        messa.exec();
     }
+
 }
 
-void make_document::make_file()
-{
-    //очистка списка активации
-    numActiveList.clear();
-    operActiveList.clear();
-
-    ui->progressBar->setValue(0);
-    ui->progressBar->setFormat("Открываем файл...");
-    ui->progressBar->setVisible(true);
-
-    //формируем имя файла для вывода
-    QFile file(ui->lineEdit_file->text());
-    QString fname = ui->lineEdit_file->text();
-    QString fnew = fname.section("/", 0, fname.split("/").size() - 2);
-    fnew.append(QString("/mix_%1").arg(fname.section("/", fname.split("/").size() - 1, fname.split("/").size() - 1)));
-
-    file.copy(fnew);
-
-    report.append("<p><strong>Отчет обработки</strong>");
-    report.append(QString("<br>Исходный файл: <b>%1</b>").arg(ui->lineEdit_file->text()));
-    report.append(QString("<br>Результат: <b>%1</b>").arg(fnew));
-
-    excel = new QAxObject("Excel.Application", this);
-    excel->setProperty("Visible", 0);
-    excel->setProperty("DisplayAlerts", 0);
-    wbook = excel->querySubObject("Workbooks");
-    book = wbook->querySubObject("Open (const QString&)", fnew);
-    sheets = book->querySubObject("Sheets");
-
-    currSheet = sheets->querySubObject("Item(Int)", ui->comboBox_list->currentIndex() + 1);
-
-    int row_count = 0;
-
-    int rows = ui->spinBox_frow->value() - 1;
-    for (int r = ui->spinBox_frow->value(); r < /*500/*/25000/**/; r++){
-        QAxObject *cell = currSheet->querySubObject("Cells(Int, Int)", r, ui->spinBox_sn->value());
-        QString _data = cell->dynamicCall("Value").toString();
-        if (_data.isEmpty()){
-            break;
-        }
-        rows++;
-        row_count++;
-        ui->progressBar->setFormat("Подсчет количества строк - %p%");
-        ui->progressBar->setValue(qFloor((r * 100) / /*500/*/25000/**/));
-        QApplication::processEvents();
-
-    }
-    report.append(QString("<br>Всего строк: %1").arg(row_count));
-
-    int _n = 0;
-    int _a = 0;
-    for (int r = ui->spinBox_frow->value(); r <= rows; r++){
-        QAxObject *cellSN = currSheet->querySubObject("Cells(Int, Int)", r, ui->spinBox_sn->value());
-        QAxObject *cellNum = currSheet->querySubObject("Cells(Int, Int)", r, ui->spinBox_num->value());
-        QAxObject *cellAct = currSheet->querySubObject("Cells(Int, Int)", r, ui->spinBox_active->value());
-
-        QString _sn = cellSN->dynamicCall("Value").toString();
-
-        QSqlQuery query(QString("SELECT phone.num, phone.active, oper.name "
-                                "FROM phone "
-                                "INNER JOIN oper ON oper.id = phone.oper "
-                                "WHERE phone.serial = \'%1\' ").arg(_sn));
-        query.next();
-        if (query.isValid()){
-            QString _num = query.value(0).toString();
-            QString _act = query.value(1).toString();
-
-            cellNum->dynamicCall("NumberFormat", "@");
-            cellNum->dynamicCall("Value", _num);
-            cellAct->dynamicCall("NumberFormat", "@");
-            cellAct->dynamicCall("Value", _act);
-
-            if (!_num.isEmpty()){
-                _n++;
-            }
-            if (!_act.isEmpty()){
-                _a++;
-            }
-            //если номер есть, а активации нет
-            if (!_num.isEmpty() and _act.isEmpty()){
-                numActiveList.append(QString("%1||%2")
-                                     .arg(query.value(2).toString())
-                                     .arg(query.value(0).toString()));
-                operActiveList.append(query.value(2).toString());
-            }
-        }
-
-        ui->progressBar->setFormat("Обработка - %p%");
-        ui->progressBar->setValue(qFloor((r * 100)/rows));
-        QApplication::processEvents();
-    }
-
-
-    book->dynamicCall("Save()");
-    wbook->dynamicCall("Close()");
-    excel->dynamicCall("Quit()");
-    delete excel;
-
-    report.append(QString("<br>Позиции с номерами: <b>%1</b>").arg(_n));
-    report.append(QString("<br>Активных номеров: <b>%1</b></p>").arg(_a));
-    ui->progressBar->hide();
-
-    //файл для проверки активации
-    if (ui->checkBox_active->isChecked()){
-        if (numActiveList.size() > 0){
-            make_file_activation();
-        }
-    }
-    //-----------------------
-
-    make_report();
-}
-
-void make_document::make_file_activation()
-{
-    operActiveList.removeDuplicates();
-    for (int a = 0; a < operActiveList.size(); a++){
-        int count = 0;
-
-        QString fname = ui->lineEdit_file->text();
-        QString nameActiveFile = fname.section("/", 0, fname.split("/").size() - 2);
-        nameActiveFile.append(QString("/%1_active_%2.txt")
-                              .arg(operActiveList.at(a))
-                              .arg(QDateTime::currentDateTime().toString("dd-MM-yyyy_hh-mm-ss")));
-
-
-        QFile file(nameActiveFile);
-        if (file.open(QIODevice::WriteOnly)){
-            QTextStream out(&file);
-            QString str;
-            for (int x = 0; x < numActiveList.size(); x++){
-                QString _oper = numActiveList.at(x).split("||").at(0);
-                if (_oper == operActiveList.at(a)){
-                    str.append(QString("%1\r\n").arg(numActiveList.at(x).split("||").at(1)));
-                    count++;
-                }
-            }
-            out << str;
-            file.close();
-        }
-        report.append("<p>------------</p>");
-        report.append(QString("<p>Создан файл проверки активации: <b>%1</b>").arg(nameActiveFile));
-        report.append(QString("<br>Кол-во номеров в файле: <b>%1</b>").arg(count));
-        report.append("<br>------------</p>");
-    }
-}
-
-void make_document::make_report()
-{
-    ui->label_report->clear();
-    ui->label_report->setTextFormat(Qt::RichText);
-    ui->label_report->setText(report);
-    ui->groupBox_report->setVisible(true);
-}

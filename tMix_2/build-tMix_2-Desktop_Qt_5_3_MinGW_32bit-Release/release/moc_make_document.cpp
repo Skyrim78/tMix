@@ -20,7 +20,7 @@
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_make_document_t {
     QByteArrayData data[9];
-    char stringdata[102];
+    char stringdata[76];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -30,18 +30,17 @@ struct qt_meta_stringdata_make_document_t {
 static const qt_meta_stringdata_make_document_t qt_meta_stringdata_make_document = {
     {
 QT_MOC_LITERAL(0, 0, 13),
-QT_MOC_LITERAL(1, 14, 4),
-QT_MOC_LITERAL(2, 19, 0),
-QT_MOC_LITERAL(3, 20, 12),
-QT_MOC_LITERAL(4, 33, 13),
-QT_MOC_LITERAL(5, 47, 11),
-QT_MOC_LITERAL(6, 59, 9),
-QT_MOC_LITERAL(7, 69, 20),
-QT_MOC_LITERAL(8, 90, 11)
+QT_MOC_LITERAL(1, 14, 14),
+QT_MOC_LITERAL(2, 29, 0),
+QT_MOC_LITERAL(3, 30, 9),
+QT_MOC_LITERAL(4, 40, 9),
+QT_MOC_LITERAL(5, 50, 8),
+QT_MOC_LITERAL(6, 59, 4),
+QT_MOC_LITERAL(7, 64, 6),
+QT_MOC_LITERAL(8, 71, 4)
     },
-    "make_document\0load\0\0setting_read\0"
-    "setting_write\0select_file\0make_file\0"
-    "make_file_activation\0make_report"
+    "make_document\0load_operators\0\0load_nakl\0"
+    "load_firm\0load_org\0load\0filter\0save"
 };
 #undef QT_MOC_LITERAL
 
@@ -84,13 +83,13 @@ void make_document::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _i
     if (_c == QMetaObject::InvokeMetaMethod) {
         make_document *_t = static_cast<make_document *>(_o);
         switch (_id) {
-        case 0: _t->load(); break;
-        case 1: _t->setting_read(); break;
-        case 2: _t->setting_write(); break;
-        case 3: _t->select_file(); break;
-        case 4: _t->make_file(); break;
-        case 5: _t->make_file_activation(); break;
-        case 6: _t->make_report(); break;
+        case 0: _t->load_operators(); break;
+        case 1: _t->load_nakl(); break;
+        case 2: _t->load_firm(); break;
+        case 3: _t->load_org(); break;
+        case 4: _t->load(); break;
+        case 5: _t->filter(); break;
+        case 6: _t->save(); break;
         default: ;
         }
     }

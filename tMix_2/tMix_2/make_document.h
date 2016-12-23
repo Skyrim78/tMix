@@ -3,9 +3,11 @@
 
 #include <QWidget>
 #include <QtSql/QtSql>
+
 #include <QFileDialog>
 #include <ActiveQt/QAxBase>
 #include <ActiveQt/QAxObject>
+#include <QMessageBox>
 
 namespace Ui {
 class make_document;
@@ -19,33 +21,30 @@ public:
     explicit make_document(QWidget *parent = 0);
     ~make_document();
 
+    QMap<int, int> map_oper;
+    QMap<int, int> map_nakl;
+    QMap<int, int> map_firm;
+    QMap<int, int> map_org;
+
     QAxObject *excel;
     QAxObject *wbook;
     QAxObject *book;
     QAxObject *sheets;
     QAxObject *currSheet;
 
-    QTimer *timer;
-
-    QString report;
-    QStringList numActiveList;
-    QStringList operActiveList;
-
-
 private:
     Ui::make_document *ui;
 
 public slots:
+    void load_operators();
+    void load_nakl();
+    void load_firm();
+    void load_org();
+
     void load();
+    void filter();
 
-    void setting_read();
-    void setting_write();
-
-    void select_file();
-    void make_file();
-    void make_file_activation();
-
-    void make_report();
+    void save();
 };
 
 #endif // MAKE_DOCUMENT_H
