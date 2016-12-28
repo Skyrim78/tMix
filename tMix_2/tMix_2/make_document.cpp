@@ -30,13 +30,33 @@ void make_document::load_operators()
 
 void make_document::load_nakl()
 {
-    map_nakl.clear();
-    ui->comboBox_f_nakl->clear();
-    QSqlQuery query("SELECT nakl.id, nakl.name FROM nakl ORDER BY nakl.name ASC ");
-    while (query.next()){
-        map_nakl.insert(ui->comboBox_f_nakl->count(), query.value(0).toInt());
-        ui->comboBox_f_nakl->addItem(query.value(1).toString());
+    for (int r = ui->tableWidget_nakl->rowCount() - 1; r >= 0; r--){
+        ui->tableWidget_nakl->removeRow(r);
     }
+
+    QSqlQuery query("SELECT nakl.id, nakl.name FROM nakl ORDER BY nakl.name ASC ");
+    int row = 0;
+    while (query.next()){
+        ui->tableWidget_nakl->insertRow(row);
+        for (int col = 0; col < 2; col++){
+            if (col == 1){
+                if (query.value(0).toInt() == 0){
+                    QTableWidgetItem *itemN = new QTableWidgetItem("НЕТ НАКЛАДНОЙ");
+                    ui->tableWidget_nakl->setItem(row, col, itemN);
+                } else {
+                    QTableWidgetItem *itemN = new QTableWidgetItem(query.value(col).toString());
+                    ui->tableWidget_nakl->setItem(row, col, itemN);
+                }
+            } else {
+                QTableWidgetItem *item = new QTableWidgetItem(query.value(col).toString());
+                ui->tableWidget_nakl->setItem(row, col, item);
+            }
+        }
+        row++;
+
+    }
+    ui->tableWidget_nakl->horizontalHeader()->setStretchLastSection(true);
+    ui->tableWidget_nakl->setColumnHidden(0, true);
 }
 
 void make_document::load_firm()
@@ -66,13 +86,15 @@ void make_document::load()
     for (int r = ui->tableWidget_filter->rowCount() - 1; r >= 0; r--){
         ui->tableWidget_filter->removeRow(r);
     }
+
+    ui->groupBox_nakl->setChecked(false);
+    for (int r = ui->tableWidget_nakl->rowCount() - 1; r >= 0; r--){
+        ui->tableWidget_nakl->removeRow(r);
+    }
+
     ui->checkBox_f_oper->setChecked(false);
     ui->comboBox_f_oper->setEnabled(false);
     connect(ui->checkBox_f_oper, SIGNAL(clicked(bool)), ui->comboBox_f_oper, SLOT(setEnabled(bool)));
-
-    ui->checkBox_f_nakl->setChecked(false);
-    ui->comboBox_f_nakl->setEnabled(false);
-    connect(ui->checkBox_f_nakl, SIGNAL(clicked(bool)), ui->comboBox_f_nakl, SLOT(setEnabled(bool)));
 
     ui->checkBox_f_firm->setChecked(false);
     ui->comboBox_f_firm->setEnabled(false);
@@ -85,8 +107,17 @@ void make_document::load()
     ui->checkBox_f_active->setChecked(false);
     ui->radioButton_fa_yes->setEnabled(false);
     ui->radioButton_fa_no->setEnabled(false);
+    ui->dateEdit_from->setEnabled(false);
+    ui->dateEdit_to->setEnabled(false);
     connect(ui->checkBox_f_active, SIGNAL(clicked(bool)), ui->radioButton_fa_yes, SLOT(setEnabled(bool)));
     connect(ui->checkBox_f_active, SIGNAL(clicked(bool)), ui->radioButton_fa_no, SLOT(setEnabled(bool)));
+
+    ui->dateEdit_from->setDate(QDate::fromJulianDay(QDate::currentDate().toJulianDay() - 7));
+    ui->dateEdit_from->setTime(QTime::fromString("00:00:01", "hh:mm:ss"));
+    ui->dateEdit_to->setDate(QDate::currentDate());
+    ui->dateEdit_to->setTime(QTime::fromString("23:59:59", "hh:mm:ss"));
+    connect(ui->checkBox_f_active, SIGNAL(clicked(bool)), ui->dateEdit_from, SLOT(setEnabled(bool)));
+    connect(ui->checkBox_f_active, SIGNAL(clicked(bool)), ui->dateEdit_to, SLOT(setEnabled(bool)));
 
     load_operators();
     load_nakl();
@@ -108,8 +139,25 @@ void make_document::filter()
     if (ui->checkBox_f_oper->isChecked()){
         str.append(QString("AND (phone.oper = \'%1\') ").arg(map_oper.value(ui->comboBox_f_oper->currentIndex())));
     }
-    if (ui->checkBox_f_nakl->isChecked()){
-        str.append(QString("AND (phone.nakl = \'%1\') ").arg(map_nakl.value(ui->comboBox_f_nakl->currentIndex())));
+    if (ui->groupBox_nakl->isChecked()){
+        if (ui->tableWidget_nakl->rowCount() > 0){
+            QList<int> list_nakl;
+            for (int row = 0; row < ui->tableWidget_nakl->rowCount(); row++){
+                if (ui->tableWidget_nakl->item(row, 0)->isSelected()){
+                    list_nakl << ui->tableWidget_nakl->item(row, 0)->text().toInt();
+                }
+            }
+            if (list_nakl.size() > 0){
+                str.append("AND (");
+                for (int x = 0; x < list_nakl.size(); x++){
+                    str.append(QString("(phone.nakl = \'%1\')").arg(list_nakl.at(x)));
+                    if (x != list_nakl.size() - 1){
+                        str.append(" OR ");
+                    }
+                }
+                str.append(") ");
+            }
+        }
     }
     if (ui->checkBox_f_firm->isChecked()){
         str.append(QString("AND (phone.firm = \'%1\') ").arg(map_firm.value(ui->comboBox_f_firm->currentIndex())));
@@ -121,9 +169,12 @@ void make_document::filter()
         if (ui->radioButton_fa_no->isChecked()){
             str.append("AND (phone.active IS NULL) ");
         } else if (ui->radioButton_fa_yes->isChecked()){
-            str.append("AND (phone.active IS NOT NULL) ");
+            str.append(QString("AND (phone.active BETWEEN \'%1\' AND \'%2\') ")
+                       .arg(ui->dateEdit_from->dateTime().toString("dd.MM.yyyy hh:mm:ss"))
+                       .arg(ui->dateEdit_to->dateTime().toString("dd.MM.yyyy hh:mm:ss")));
         }
     }
+
     QSqlQuery query(str);
     int row = 0;
     while (query.next()){
@@ -163,9 +214,15 @@ void make_document::save()
         currSheet = book->querySubObject("ActiveSheet");
         currSheet->dynamicCall("Name", "tMix");//QString("tMix_%1").arg(QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss")));
 
+        for (int col = 0; col < ui->tableWidget_filter->columnCount(); col++){
+            QAxObject *cell = currSheet->querySubObject("Cells(Int, Int)", 1, col + 1);
+            cell->dynamicCall("NumberFormat", "@");
+            cell->dynamicCall("Value", ui->tableWidget_filter->horizontalHeaderItem(col)->text());
+        }
+
         for (int row = 0; row < ui->tableWidget_filter->rowCount(); row++){
             for (int col = 0; col < ui->tableWidget_filter->columnCount(); col++){
-                QAxObject *cell = currSheet->querySubObject("Cells(Int, Int)", row + 1, col + 1);
+                QAxObject *cell = currSheet->querySubObject("Cells(Int, Int)", row + 2, col + 1);
                 cell->dynamicCall("NumberFormat", "@");
                 cell->dynamicCall("Value", ui->tableWidget_filter->item(row, col)->text());
             }
